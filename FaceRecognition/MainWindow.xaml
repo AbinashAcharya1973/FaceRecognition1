@@ -1,0 +1,15 @@
+﻿<Window x:Class="FaceRecognition.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FaceRecognition"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Image Name="CameraFeed" VerticalAlignment="Top" Height="342" Margin="35,31,40,0"/>
+        <Button Name="StartButton" Content="Start Camera" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="20" Width="100" Click="StartButton_Click"/>
+        <Button Name="StopButton" Content="Stop Camera" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="20" Width="100" Click="StopButton_Click"/>
+        <Button Name="CaptureButton" Content="Capture" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" Width="100" Click="CaptureButton_Click"/>
+    </Grid>
+</Window>
