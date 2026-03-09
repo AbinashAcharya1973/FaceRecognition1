@@ -4,9 +4,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+
 
 namespace FaceRecognition
 {
@@ -43,17 +46,46 @@ namespace FaceRecognition
 
                 if (!frame.IsEmpty)
                 {
-                    var bitmap = BitmapSourceConverter(frame);
-
-                    // Update the UI on the dispatcher thread
-                    Dispatcher.Invoke(() =>
+                    try
                     {
-                        imageControl.Source = bitmap;
+                        var bitmap = BitmapSourceConverter(frame);
+                        Mat testFrame = new Mat(480, 640, Emgu.CV.CvEnum.DepthType.Cv8U, 3);
+                        testFrame.SetTo(new MCvScalar(0, 255, 0)); // Green frame
+                        BitmapSource testBitmap = BitmapSourceConverter(testFrame);
+                        // Update the UI on the dispatcher thread
+                        Dispatcher.Invoke(() =>
+                        {
+                            //BitmapSource testBitmap = new BitmapImage(new Uri("D:\\CapturedFrames\\frame_20241210_113439.jpg", UriKind.RelativeOrAbsolute));
+                            //imageControl.Source = bitmap;
+                            if (bitmap != null)
+                            {
+                                imageControl.Source = testBitmap;
+                                Console.WriteLine("OK");
+                            }
+                            else
+                            {
+                                Console.WriteLine("BitmapSource conversion failed.");
+                            }
+                            //this.CameraFeed.Source = bitmap;
 
-                    });
+                        });
+                    }
+                    catch (Exception ex) {
+                        MessageBox.Show("Error updating the image control:"+ex.Message);
+                    }
+                
+                }
+                else
+                {
+                    if (frame.IsEmpty)
+                    {
+                        MessageBox.Show("Frame is Blank");
+                        Console.WriteLine("Frame is blank.");
+                    }
+
                 }
 
-                Thread.Sleep(35); // Sleep for 33ms (approx. 30 FPS)
+                Thread.Sleep(33); // Sleep for 33ms (approx. 30 FPS)
             }
         }
 
@@ -111,9 +143,29 @@ namespace FaceRecognition
 
         private BitmapSource BitmapSourceConverter(Mat mat)
         {
-            return BitmapSource.Create(mat.Width, mat.Height, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
-                mat.DataPointer, mat.Step * mat.Height, mat.Step);
+            try
+            {
+                // Convert Mat to Bitmap if necessary
+                if (mat.Depth != Emgu.CV.CvEnum.DepthType.Cv8U || mat.NumberOfChannels != 3)
+                {
+                    throw new NotSupportedException("Mat format not supported. Ensure 8-bit depth and 3 channels.");
+                }
+
+                return BitmapSource.Create(
+                    mat.Width, mat.Height,
+                    96, 96, PixelFormats.Bgr24,
+                    null,
+                    mat.DataPointer,
+                    mat.Step * mat.Height,
+                    mat.Step);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error converting Mat to BitmapSource: {ex.Message}");
+                return null;
+            }
         }
+
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
